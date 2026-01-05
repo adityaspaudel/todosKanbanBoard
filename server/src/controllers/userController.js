@@ -70,7 +70,7 @@ const userLogin = async (req, res) => {
 					expiresIn: "7d",
 				});
 				res.json({
-					msg: "Login successful",
+					message: "Login successful",
 					token,
 					user: { id: existingUserByEmail._id, email },
 				});

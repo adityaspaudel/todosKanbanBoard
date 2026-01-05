@@ -1,7 +1,12 @@
 import React from "react";
+import UserLogin from "./(auth)/login/page";
 
 const Home = () => {
-	return <div>Home</div>;
+	return (
+		<>
+			<UserLogin />
+		</>
+	);
 };
 
 export default Home;
