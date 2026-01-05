@@ -5,7 +5,7 @@ dotenv.config();
 const express = require("express");
 const cors = require("cors");
 const app = express();
-
+const userRoute = require("./routes/userRoute");
 // middleware
 
 app.use(express.json());
@@ -15,8 +15,7 @@ app.use(cors());
 dbConnect();
 
 // routing
-
-
+app.use(userRoute);
 
 // 404 HANDLER (Route Not Found)
 app.use((req, res, next) => {
