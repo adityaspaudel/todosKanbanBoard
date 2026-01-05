@@ -1,0 +1,84 @@
+const User = require("../models/userModel");
+const bcrypt = require("bcrypt");
+const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+// ------------------ Helpers ------------------
+const saltRounds = 10;
+const hashPassword = async (password) =>
+	await bcrypt.hash(password, saltRounds);
+const SECRET_KEY = process.env.SECRET_KEY;
+
+const userRegistration = async (req, res) => {
+	try {
+		const { fullName, email, password } = req.body;
+		if (!fullName || !email || !password) {
+			res.status(204).send({
+				message: "please enter fullName, email and password",
+				success: false,
+			});
+		}
+		const existingUserByEmail = await User.findOne({ email });
+		if (existingUserByEmail) {
+			res.status(409).send({
+				message: "email already exist, try different email",
+				success: false,
+			});
+		} else {
+			const hashedPassword = await hashPassword(password);
+
+			const newUser = new User({ fullName, email, password: hashedPassword });
+			newUser.save();
+			res.status(201).send({
+				message: "user registration successful",
+				success: true,
+				email: newUser.email,
+				fullName: newUser.fullName,
+			});
+		}
+	} catch (error) {
+		res
+			.status(500)
+			.send({ message: "user registration failed", success: false });
+	}
+};
+
+const userLogin = async (req, res) => {
+	try {
+		const { email, password } = req.body;
+
+		if (!email || !password) {
+			res
+				.status(204)
+				.send({ message: "please enter email and password", success: false });
+		}
+		const existingUserByEmail = await User.findOne({ email }).select(
+			"+password"
+		);
+		if (!existingUserByEmail) {
+			res.status(400).send({ message: "user doesn`t exist", success: false });
+		} else {
+			const isMatch = await bcrypt.compare(
+				password,
+				existingUserByEmail.password
+			);
+			if (!isMatch) {
+				res
+					.status(401)
+					.send({ message: "password doesn`t match", success: false });
+			} else {
+				const token = jwt.sign({ id: existingUserByEmail._id }, SECRET_KEY, {
+					expiresIn: "7d",
+				});
+				res.json({
+					msg: "Login successful",
+					token,
+					user: { id: existingUserByEmail._id, email },
+				});
+			}
+		}
+	} catch (error) {
+		console.error(error);
+		res.status(500).send({ message: "userLogin failed", success: false });
+	}
+};
+module.exports = { userRegistration, userLogin };
