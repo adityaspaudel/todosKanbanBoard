@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import { Formik, Field, Form } from "formik";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 // const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -18,7 +19,7 @@ const UserLogin = () => {
 	const router = useRouter();
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100 p-4">
+		<div className="min-h-screen flex items-center justify-center bg-linear-to-br from-indigo-100 to-purple-100 p-4 text-gray-800">
 			<div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
 				<h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
 					Login
@@ -96,6 +97,15 @@ const UserLogin = () => {
 					)}
 				</Formik>
 
+				<div className="text-sm flex  justify-center items-center">
+					Don`t have an account?
+					<Link href={`/register`}>
+						<span className="hover:underline hover:text-blue-600">
+							{" "}
+							Signup here
+						</span>
+					</Link>
+				</div>
 				{/* <div>{JSON.stringify(formData)}</div> */}
 			</div>
 		</div>
