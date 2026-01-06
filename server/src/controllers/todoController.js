@@ -62,7 +62,7 @@ const getTodos = async (req, res) => {
 const updateTodo = async (req, res) => {
 	try {
 		const { todoId } = req.params;
-		const { title, description, status, order } = req.body;
+		const { title, description, status } = req.body;
 
 		if (!mongoose.Types.ObjectId.isValid(todoId)) {
 			return res.status(400).json({ message: "Invalid todoId" });
@@ -74,23 +74,17 @@ const updateTodo = async (req, res) => {
 				...(title !== undefined && { title }),
 				...(description !== undefined && { description }),
 				...(status !== undefined && { status }),
-				...(order !== undefined && { order }),
 			},
 			{ new: true }
 		);
 
-		if (!updatedTodo) {
+		if (!updatedTodo)
 			return res.status(404).json({ message: "Todo not found" });
-		}
 
-		res.status(200).json({
-			message: "Todo updated successfully",
-			todo: updatedTodo,
-		});
+		res
+			.status(200)
+			.json({ message: "Todo updated successfully", todo: updatedTodo });
 	} catch (error) {
-		if (error.code === 11000) {
-			return res.status(409).json({ message: "Order conflict, retry" });
-		}
 		res.status(500).json({ error: error.message });
 	}
 };
@@ -118,4 +112,32 @@ const deleteTodo = async (req, res) => {
 	}
 };
 
-module.exports = { createTodo, getTodos, updateTodo, deleteTodo };
+const moveTodo = async (req, res) => {
+	try {
+		const { todoId } = req.params;
+		const { status, order } = req.body;
+
+		if (!mongoose.Types.ObjectId.isValid(todoId)) {
+			return res.status(400).json({ message: "Invalid todoId" });
+		}
+
+		const todo = await Todo.findById(todoId);
+		if (!todo) return res.status(404).json({ message: "Todo not found" });
+
+		// Shift todos in target column to make room for dragged item
+		await Todo.updateMany(
+			{ status, order: { $gte: order }, userId: todo.userId },
+			{ $inc: { order: 1 } }
+		);
+
+		// Update dragged todo
+		todo.status = status;
+		todo.order = order;
+		await todo.save();
+
+		res.status(200).json({ message: "Todo moved successfully", todo });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+module.exports = { createTodo, getTodos, updateTodo, deleteTodo,moveTodo };

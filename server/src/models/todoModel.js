@@ -25,7 +25,7 @@ const todoSchema = new mongoose.Schema(
 
 		order: {
 			type: Number,
-			required: true,
+			default: 0, // <-- make it optional, default 0
 			min: 0,
 			index: true,
 		},
@@ -39,13 +39,10 @@ const todoSchema = new mongoose.Schema(
 	},
 	{
 		timestamps: true,
-		indexes: [
-			{
-				fields: { userId: 1, status: 1, order: 1 },
-				options: { unique: true },
-			},
-		],
 	}
 );
+
+// Optional: index to speed up queries
+todoSchema.index({ userId: 1, status: 1, order: 1 });
 
 module.exports = mongoose.model("Todo", todoSchema);

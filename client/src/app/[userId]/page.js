@@ -20,7 +20,9 @@ import { CSS } from "@dnd-kit/utilities";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// -------------------------
 // Sortable Todo Item
+// -------------------------
 function SortableItem({ todo, status, handleEdit, deleteTodo }) {
 	const { attributes, listeners, setNodeRef, transform, transition } =
 		useSortable({ id: String(todo._id) });
@@ -38,21 +40,28 @@ function SortableItem({ todo, status, handleEdit, deleteTodo }) {
 			{...listeners}
 			data-status={status}
 			data-id={String(todo._id)}
-			className="bg-white p-3 rounded shadow mb-2 flex flex-col gap-2 cursor-pointer"
+			className="bg-white dark:bg-gray-800 p-3 rounded shadow mb-3 flex flex-col gap-2 cursor-pointer 
+					   hover:scale-[1.02] transition-transform duration-200 ease-out"
 		>
-			<p className="font-medium">{todo.title}</p>
-			<p className="text-sm text-gray-500">{todo.description}</p>
-			<p className="text-sm text-gray-700">Status: {todo.status}</p>
-			<div className="flex gap-1">
+			<p className="font-semibold text-gray-900 dark:text-gray-100">
+				{todo.title}
+			</p>
+			<p className="text-sm text-gray-500 dark:text-gray-400">
+				{todo.description}
+			</p>
+			<p className="text-sm text-gray-700 dark:text-gray-300">
+				Status: {todo.status}
+			</p>
+			<div className="flex gap-2 mt-2">
 				<button
 					onClick={() => handleEdit(todo)}
-					className="bg-yellow-500 text-white px-3 rounded"
+					className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded transition-colors duration-200"
 				>
 					Edit
 				</button>
 				<button
 					onClick={() => deleteTodo(todo._id)}
-					className="bg-red-500 text-white px-3 rounded"
+					className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition-colors duration-200"
 				>
 					Delete
 				</button>
@@ -61,9 +70,9 @@ function SortableItem({ todo, status, handleEdit, deleteTodo }) {
 	);
 }
 
-
+// -------------------------
 // Kanban Column Droppable
-
+// -------------------------
 function KanbanColumn({ status, todos, handleEdit, deleteTodo }) {
 	const { setNodeRef } = useDroppable({ id: status });
 
@@ -71,9 +80,12 @@ function KanbanColumn({ status, todos, handleEdit, deleteTodo }) {
 		<div
 			ref={setNodeRef}
 			data-status={status}
-			className="bg-gray-200 p-3 rounded min-h-75 w-64 shrink-0"
+			className="bg-gray-300 dark:bg-gray-700 p-3 rounded min-h-[300px] w-64 shrink-0
+					   flex flex-col transition-all duration-300 hover:shadow-lg"
 		>
-			<h2 className="font-bold text-lg mb-2 capitalize">{status}</h2>
+			<h2 className="font-bold text-lg mb-2 text-indigo-900 dark:text-indigo-300 capitalize">
+				{status}
+			</h2>
 			{todos.map((todo) => (
 				<SortableItem
 					key={todo._id}
@@ -83,13 +95,18 @@ function KanbanColumn({ status, todos, handleEdit, deleteTodo }) {
 					deleteTodo={deleteTodo}
 				/>
 			))}
+			{todos.length === 0 && (
+				<div className="text-gray-500 dark:text-gray-400 text-center mt-8 italic select-none">
+					Drop here
+				</div>
+			)}
 		</div>
 	);
 }
 
-
+// -------------------------
 // Main KanbanPage Component
-
+// -------------------------
 export default function KanbanPage() {
 	const { userId } = useParams();
 	const router = useRouter();
@@ -196,7 +213,6 @@ export default function KanbanPage() {
 		let overStatus = dragged.status;
 		let newIndex = 0;
 
-		// Dropped on a todo item
 		const overTodo = todos.find((t) => String(t._id) === String(over.id));
 		if (overTodo) {
 			overStatus = overTodo.status;
@@ -205,21 +221,15 @@ export default function KanbanPage() {
 				.filter((t) => t.status === overStatus);
 			newIndex = targetColumn.findIndex((t) => t._id === overTodo._id);
 			if (newIndex === -1) newIndex = targetColumn.length;
-		}
-		// Dropped on empty column
-		else if (["todo", "new", "doing", "done"].includes(over.id)) {
+		} else if (["todo", "new", "doing", "done"].includes(over.id)) {
 			overStatus = over.id;
 			newIndex = 0;
 		}
 
-		// Remove dragged
 		const newTodos = todos.filter((t) => t._id !== dragged._id);
 		const targetColumn = newTodos.filter((t) => t.status === overStatus);
-
-		// Insert dragged
 		targetColumn.splice(newIndex, 0, { ...dragged, status: overStatus });
 
-		// Rebuild updatedTodos with correct order
 		const updatedTodos = [];
 		for (const status of ["todo", "new", "doing", "done"]) {
 			const column =
@@ -231,7 +241,6 @@ export default function KanbanPage() {
 
 		setTodos(updatedTodos);
 
-		// Backend update
 		try {
 			const movedTodo = updatedTodos.find((t) => t._id === dragged._id);
 			await fetch(`${API_URL}/todo/${dragged._id}/moveTodo`, {
@@ -249,42 +258,46 @@ export default function KanbanPage() {
 		}
 	};
 
-	
+	// -------------------------
+	// Render
+	// -------------------------
 	return (
-		<div className="min-h-screen bg-gray-100 p-6 text-black">
+		<div className="flex flex-col content-center items-center min-h-screen bg-gray-100 dark:bg-gray-900 p-6 text-black dark:text-white">
 			{/* Header */}
-			<div className="flex justify-between items-center mb-4">
-				<h1 className="text-2xl font-bold">Kanban Todos</h1>
+			<div className="flex justify-between w-full items-center mb-6">
+				<h1 className="text-2xl font-bold text-indigo-900 dark:text-indigo-300">
+					Kanban Todos
+				</h1>
 				<button
 					onClick={() => router.push("/")}
-					className="text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded"
+					className="text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded transition-colors duration-200"
 				>
 					Logout
 				</button>
 			</div>
 
 			{/* Todo Form */}
-			<div className="bg-white p-4 rounded shadow mb-6 space-y-3">
+			<div className="bg-white dark:bg-gray-800 p-4 rounded shadow mb-6 space-y-3">
 				<input
 					type="text"
 					name="title"
 					value={formData.title}
 					onChange={handleChange}
 					placeholder="Todo title *"
-					className="w-full p-2 border rounded"
+					className="w-full p-2 border rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 				/>
 				<textarea
 					name="description"
 					value={formData.description}
 					onChange={handleChange}
 					placeholder="Description (optional)"
-					className="w-full p-2 border rounded"
+					className="w-full p-2 border rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 				/>
 				<select
 					name="status"
 					value={formData.status}
 					onChange={handleChange}
-					className="p-2 border rounded"
+					className="p-2 border rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 				>
 					<option value="todo">Todo</option>
 					<option value="new">New</option>
@@ -293,7 +306,7 @@ export default function KanbanPage() {
 				</select>
 				<button
 					onClick={submitTodo}
-					className="bg-blue-600 text-white px-4 py-2 rounded"
+					className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded transition-colors duration-200"
 				>
 					{editingTodoId ? "Update Todo" : "Add Todo"}
 				</button>
@@ -301,7 +314,7 @@ export default function KanbanPage() {
 
 			{/* Kanban Columns */}
 			{loading ? (
-				<p>Loading...</p>
+				<p className="text-center">Loading...</p>
 			) : (
 				<DndContext
 					sensors={sensors}
@@ -309,7 +322,7 @@ export default function KanbanPage() {
 					onDragEnd={handleDragEnd}
 					onDragStart={(e) => setActiveId(e.active.id)}
 				>
-					<div className="flex gap-4 overflow-x-auto">
+					<div className="flex gap-4 overflow-x-auto pb-4">
 						{["todo", "new", "doing", "done"].map((status) => (
 							<KanbanColumn
 								key={status}
@@ -323,7 +336,7 @@ export default function KanbanPage() {
 
 					<DragOverlay>
 						{activeId ? (
-							<div className="bg-white p-3 rounded shadow">
+							<div className="bg-white dark:bg-gray-800 p-3 rounded shadow-lg text-indigo-900 dark:text-indigo-300">
 								{todos.find((t) => String(t._id) === String(activeId))?.title}
 							</div>
 						) : null}
