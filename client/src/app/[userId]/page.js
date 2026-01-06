@@ -8,19 +8,15 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export default function KanbanPage() {
 	const { userId } = useParams();
 
-	// ✅ ADDED: todos state
 	const [todos, setTodos] = useState([]);
-
 	const [formData, setFormData] = useState({
 		title: "",
 		description: "",
 		status: "todo",
-		options: "",
 	});
-
 	const [loading, setLoading] = useState(false);
+	const [editingTodoId, setEditingTodoId] = useState(null);
 
-	// ✅ ADDED: handleChange
 	const handleChange = (e) => {
 		const { name, value } = e.target;
 		setFormData((prev) => ({
@@ -43,38 +39,32 @@ export default function KanbanPage() {
 		setLoading(false);
 	};
 
-	// CREATE TODO
-	const createTodo = async () => {
+	// CREATE OR UPDATE TODO
+	const submitTodo = async () => {
 		if (!formData.title.trim()) return;
 
-		await fetch(`${API_URL}/todo/${userId}/createTodo`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				title: formData.title,
-				description: formData.description || "",
-				status: formData.status,
-				options: formData.options,
-			}),
-		});
+		if (editingTodoId) {
+			// UPDATE
+			await fetch(`${API_URL}/todo/${editingTodoId}/updateTodo`, {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(formData),
+			});
+		} else {
+			// CREATE
+			await fetch(`${API_URL}/todo/${userId}/createTodo`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(formData),
+			});
+		}
 
 		setFormData({
 			title: "",
 			description: "",
 			status: "todo",
 		});
-
-		fetchTodos();
-	};
-
-	// UPDATE TODO
-	const updateTodo = async (todoId, updates) => {
-		await fetch(`${API_URL}/todo/${todoId}/updateTodo`, {
-			method: "PUT",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(updates),
-		});
-
+		setEditingTodoId(null);
 		fetchTodos();
 	};
 
@@ -83,8 +73,17 @@ export default function KanbanPage() {
 		await fetch(`${API_URL}/todo/${todoId}/deleteTodo`, {
 			method: "DELETE",
 		});
-
 		fetchTodos();
+	};
+
+	// CLICK EDIT
+	const handleEdit = (todo) => {
+		setFormData({
+			title: todo.title,
+			description: todo.description || "",
+			status: todo.status,
+		});
+		setEditingTodoId(todo._id);
 	};
 
 	useEffect(() => {
@@ -96,7 +95,7 @@ export default function KanbanPage() {
 		<div className="min-h-screen bg-gray-100 p-6 text-black">
 			<h1 className="text-2xl font-bold mb-4">Kanban Todos</h1>
 
-			{/* CREATE */}
+			{/* CREATE / EDIT FORM */}
 			<div className="bg-white p-4 rounded shadow mb-6 space-y-3">
 				<input
 					type="text"
@@ -130,10 +129,10 @@ export default function KanbanPage() {
 				</div>
 
 				<button
-					onClick={createTodo}
+					onClick={submitTodo}
 					className="bg-blue-600 text-white px-4 py-2 rounded"
 				>
-					Add Todo
+					{editingTodoId ? "Update Todo" : "Add Todo"}
 				</button>
 			</div>
 
@@ -156,9 +155,7 @@ export default function KanbanPage() {
 							<select
 								value={todo.status}
 								onChange={(e) =>
-									updateTodo(todo._id, {
-										status: e.target.value,
-									})
+									submitTodo(todo._id, { status: e.target.value })
 								}
 								className="border rounded p-1"
 							>
@@ -167,6 +164,13 @@ export default function KanbanPage() {
 								<option value="doing">Doing</option>
 								<option value="done">Done</option>
 							</select>
+
+							<button
+								onClick={() => handleEdit(todo)}
+								className="bg-yellow-500 text-white px-3 rounded"
+							>
+								Edit
+							</button>
 
 							<button
 								onClick={() => deleteTodo(todo._id)}
