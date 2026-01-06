@@ -35,7 +35,10 @@ export default function KanbanPage() {
 		});
 		const data = await res.json();
 
-		setTodos(data.todos || []);
+		// sort by order ascending
+		const sortedTodos = (data.todos || []).sort((a, b) => a.order - b.order);
+
+		setTodos(sortedTodos);
 		setLoading(false);
 	};
 
@@ -44,14 +47,12 @@ export default function KanbanPage() {
 		if (!formData.title.trim()) return;
 
 		if (editingTodoId) {
-			// UPDATE
 			await fetch(`${API_URL}/todo/${editingTodoId}/updateTodo`, {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(formData),
 			});
 		} else {
-			// CREATE
 			await fetch(`${API_URL}/todo/${userId}/createTodo`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -59,20 +60,14 @@ export default function KanbanPage() {
 			});
 		}
 
-		setFormData({
-			title: "",
-			description: "",
-			status: "todo",
-		});
+		setFormData({ title: "", description: "", status: "todo" });
 		setEditingTodoId(null);
 		fetchTodos();
 	};
 
 	// DELETE TODO
 	const deleteTodo = async (todoId) => {
-		await fetch(`${API_URL}/todo/${todoId}/deleteTodo`, {
-			method: "DELETE",
-		});
+		await fetch(`${API_URL}/todo/${todoId}/deleteTodo`, { method: "DELETE" });
 		fetchTodos();
 	};
 
@@ -90,7 +85,14 @@ export default function KanbanPage() {
 		fetchTodos();
 	}, [userId]);
 
-	// UI
+	// divide todos by status
+	const todoColumns = {
+		todo: todos.filter((t) => t.status === "todo"),
+		new: todos.filter((t) => t.status === "new"),
+		doing: todos.filter((t) => t.status === "doing"),
+		done: todos.filter((t) => t.status === "done"),
+	};
+
 	return (
 		<div className="min-h-screen bg-gray-100 p-6 text-black">
 			<h1 className="text-2xl font-bold mb-4">Kanban Todos</h1>
@@ -105,7 +107,6 @@ export default function KanbanPage() {
 					placeholder="Todo title *"
 					className="w-full p-2 border rounded"
 				/>
-
 				<textarea
 					name="description"
 					value={formData.description}
@@ -113,7 +114,6 @@ export default function KanbanPage() {
 					placeholder="Description (optional)"
 					className="w-full p-2 border rounded"
 				/>
-
 				<div className="flex gap-3">
 					<select
 						name="status"
@@ -127,7 +127,6 @@ export default function KanbanPage() {
 						<option value="done">Done</option>
 					</select>
 				</div>
-
 				<button
 					onClick={submitTodo}
 					className="bg-blue-600 text-white px-4 py-2 rounded"
@@ -139,46 +138,48 @@ export default function KanbanPage() {
 			{/* LOADING */}
 			{loading && <p>Loading...</p>}
 
-			{/* LIST */}
-			<div className="space-y-2">
-				{todos.map((todo) => (
-					<div
-						key={todo._id}
-						className="bg-white p-3 rounded shadow flex justify-between items-center"
-					>
-						<div>
-							<p className="font-medium">{todo.title}</p>
-							<p className="text-sm text-gray-500">Status: {todo.status}</p>
-						</div>
-
-						<div className="flex gap-2">
-							<select
-								value={todo.status}
-								onChange={(e) =>
-									submitTodo(todo._id, { status: e.target.value })
-								}
-								className="border rounded p-1"
+			{/* KANBAN COLUMNS */}
+			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+				{["todo", "new", "doing", "done"].map((status) => (
+					<div key={status} className="bg-gray-200 p-3 rounded">
+						<h2 className="font-bold text-lg mb-2 capitalize">{status}</h2>
+						{todoColumns[status].map((todo) => (
+							<div
+								key={todo._id}
+								className="bg-white p-3 rounded shadow mb-2 flex flex-col gap-2"
 							>
-								<option value="todo">Todo</option>
-								<option value="new">New</option>
-								<option value="doing">Doing</option>
-								<option value="done">Done</option>
-							</select>
-
-							<button
-								onClick={() => handleEdit(todo)}
-								className="bg-yellow-500 text-white px-3 rounded"
-							>
-								Edit
-							</button>
-
-							<button
-								onClick={() => deleteTodo(todo._id)}
-								className="bg-red-500 text-white px-3 rounded"
-							>
-								Delete
-							</button>
-						</div>
+								<p className="font-medium">{todo.title}</p>
+								<p className="text-sm text-gray-500">{todo.description}</p>
+								<div className="flex justify-between items-center gap-2">
+									<select
+										value={todo.status}
+										onChange={(e) =>
+											submitTodo(todo._id, { status: e.target.value })
+										}
+										className="border rounded p-1"
+									>
+										<option value="todo">Todo</option>
+										<option value="new">New</option>
+										<option value="doing">Doing</option>
+										<option value="done">Done</option>
+									</select>
+									<div className="flex gap-1">
+										<button
+											onClick={() => handleEdit(todo)}
+											className="bg-yellow-500 text-white px-3 rounded"
+										>
+											Edit
+										</button>
+										<button
+											onClick={() => deleteTodo(todo._id)}
+											className="bg-red-500 text-white px-3 rounded"
+										>
+											Delete
+										</button>
+									</div>
+								</div>
+							</div>
+						))}
 					</div>
 				))}
 			</div>
