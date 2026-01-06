@@ -95,4 +95,27 @@ const updateTodo = async (req, res) => {
 	}
 };
 
-module.exports = { createTodo, getTodos, updateTodo };
+const deleteTodo = async (req, res) => {
+	try {
+		const { todoId } = req.params;
+
+		if (!mongoose.Types.ObjectId.isValid(todoId)) {
+			return res.status(400).json({ message: "Invalid todoId" });
+		}
+
+		const deletedTodo = await Todo.findByIdAndDelete(todoId);
+
+		if (!deletedTodo) {
+			return res.status(404).json({ message: "Todo not found" });
+		}
+
+		res.status(200).json({
+			message: "Todo deleted successfully",
+			todo: deletedTodo,
+		});
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
+module.exports = { createTodo, getTodos, updateTodo, deleteTodo };
