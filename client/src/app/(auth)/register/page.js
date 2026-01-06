@@ -1,10 +1,9 @@
 "use client";
-import React, { useState } from "react";
-import ReactDOM from "react-dom";
+
+import React, { useState, useEffect } from "react";
 import { Formik, Field, Form } from "formik";
 import Link from "next/link";
-
-// const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+import { useRouter } from "next/navigation";
 
 const UserRegistration = () => {
 	const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -13,106 +12,122 @@ const UserRegistration = () => {
 		email: "",
 		password: "",
 	});
+	const [fadeIn, setFadeIn] = useState(false);
+
+	const router = useRouter();
+
+	useEffect(() => {
+		setFadeIn(true);
+	}, []);
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-linear-to-br from-indigo-100 to-purple-100 p-4 text-gray-800">
-			<div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-				<h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
+		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-gray-100 p-4">
+			<div
+				className={`w-full max-w-md bg-gray-900 text-white rounded-3xl shadow-2xl p-8
+					transform transition-all duration-500 ease-out
+					${fadeIn ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-10"}
+					hover:scale-[1.02]`}
+			>
+				<h1 className="text-3xl font-bold text-center text-indigo-400 mb-6">
 					Sign Up
 				</h1>
 
 				<Formik
 					initialValues={formData}
 					onSubmit={async (values) => {
-						// await sleep(500);
-						// alert(JSON.stringify(values, null, 2));
-
 						try {
 							const response = await fetch(
 								`${NEXT_PUBLIC_API_URL}/user/userRegistration`,
 								{
 									method: "POST",
-									headers: {
-										"Content-Type": "application/json",
-									},
+									headers: { "Content-Type": "application/json" },
 									body: JSON.stringify(values),
 								}
 							);
-							if (!response.ok) throw new Error(response.message);
+							if (!response.ok) throw new Error("Registration failed");
+
 							const parsedData = await response.json();
 							setFormData(parsedData);
 							alert(parsedData.message);
+							router.push("/login");
 						} catch (error) {
 							console.error("error occurred", error);
+							alert("Registration failed. Please try again.");
 						}
 					}}
 				>
 					{({ isSubmitting }) => (
-						<Form className="space-y-4">
-							<div>
+						<Form className="space-y-6">
+							{/* Full Name */}
+							<div className="relative">
 								<label
 									htmlFor="fullName"
-									className="block text-sm font-medium text-gray-800 mb-1"
+									className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-1"
 								>
 									Full Name
 								</label>
 								<Field
 									name="fullName"
-									placeholder="Jane Doe"
-									className="w-full rounded-lg border border-gray-300 text-gray-800 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+									placeholder="Full Name"
+									className="peer w-full rounded-xl border border-gray-300 px-4 py-3 bg-white text-gray-900
+										focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all duration-300"
 								/>
 							</div>
 
-							<div>
+							{/* Email */}
+							<div className="relative">
 								<label
 									htmlFor="email"
-									className="block text-sm font-medium text-gray-800 mb-1"
+									className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-1"
 								>
 									Email
 								</label>
 								<Field
 									name="email"
-									placeholder="janedoe@acme.com"
 									type="email"
-									className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 text-gray-800 focus:ring-indigo-400"
+									placeholder="Email"
+									className="peer w-full rounded-xl border border-gray-300 px-4 py-3 bg-white text-gray-900
+										focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all duration-300"
 								/>
 							</div>
 
-							<div>
+							{/* Password */}
+							<div className="relative">
 								<label
 									htmlFor="password"
-									className="block text-sm font-medium text-gray-800 mb-1"
+									className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-1"
 								>
 									Password
 								</label>
 								<Field
 									type="password"
 									name="password"
-									placeholder="********"
-									className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 text-gray-800 focus:ring-indigo-400"
+									placeholder="Password"
+									className="peer w-full rounded-xl border border-gray-300 px-4 py-3 bg-white text-gray-900
+										focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all duration-300"
 								/>
 							</div>
 
 							<button
 								type="submit"
 								disabled={isSubmitting}
-								className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-60"
+								className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-300
+									disabled:opacity-60 disabled:cursor-not-allowed"
 							>
-								Submit
+								Register
 							</button>
 						</Form>
 					)}
 				</Formik>
-				<div className="text-sm flex  justify-center items-center">
-					Already have an account?
+
+				<div className="text-sm text-center mt-6 text-gray-300">
+					Already have an account?{" "}
 					<Link href={`/login`}>
-						<span className="hover:underline hover:text-blue-600">
-							{" "}
+						<span className="hover:underline hover:text-indigo-400 cursor-pointer">
 							Login here
 						</span>
 					</Link>
 				</div>
-				{/* <div>{JSON.stringify(formData)}</div> */}
 			</div>
 		</div>
 	);

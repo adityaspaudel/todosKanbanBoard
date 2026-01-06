@@ -1,13 +1,9 @@
 "use client";
 
-"use client";
 import React, { useState } from "react";
-import ReactDOM from "react-dom";
 import { Formik, Field, Form } from "formik";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
-// const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const UserLogin = () => {
 	const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -19,18 +15,18 @@ const UserLogin = () => {
 	const router = useRouter();
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-linear-to-br from-indigo-100 to-purple-100 p-4 text-gray-800">
-			<div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-				<h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
+		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-gray-100 p-4">
+			<div
+				className="w-full max-w-md bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 
+							transition-transform transform hover:scale-[1.02] duration-300"
+			>
+				<h1 className="text-3xl font-bold text-center text-indigo-900 dark:text-indigo-300 mb-6">
 					Login
 				</h1>
 
 				<Formik
 					initialValues={formData}
 					onSubmit={async (values) => {
-						// await sleep(500);
-						// alert(JSON.stringify(values, null, 2));
-
 						try {
 							const response = await fetch(
 								`${NEXT_PUBLIC_API_URL}/user/userLogin`,
@@ -43,23 +39,23 @@ const UserLogin = () => {
 								}
 							);
 
-							if (!response.ok) throw new Error(response.message);
+							if (!response.ok) throw new Error("Login failed");
 
 							const parsedData = await response.json();
 							setFormData(parsedData);
-							alert(JSON.stringify(parsedData, 2, 2));
 							router.push(`/${parsedData.user.id}`);
 						} catch (error) {
 							console.error("error occurred", error);
+							alert("Invalid credentials. Please try again.");
 						}
 					}}
 				>
 					{({ isSubmitting }) => (
-						<Form className="space-y-4">
-							<div>
+						<Form className="space-y-5">
+							<div className="relative">
 								<label
 									htmlFor="email"
-									className="block text-sm font-medium text-gray-800 mb-1"
+									className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-1"
 								>
 									Email
 								</label>
@@ -67,14 +63,15 @@ const UserLogin = () => {
 									name="email"
 									type="email"
 									placeholder="janedoe@acme.com"
-									className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+									className="peer w-full rounded-xl border border-gray-300 px-4 py-3 bg-white text-gray-900
+										focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all duration-300"
 								/>
 							</div>
 
-							<div>
+							<div className="relative">
 								<label
 									htmlFor="password"
-									className="block text-sm font-medium text-gray-800 mb-1"
+									className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-1"
 								>
 									Password
 								</label>
@@ -82,14 +79,17 @@ const UserLogin = () => {
 									type="password"
 									name="password"
 									placeholder="********"
-									className="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+									className="peer w-full rounded-xl border border-gray-300 px-4 py-3 bg-white text-gray-900
+										focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all duration-300"
 								/>
 							</div>
 
 							<button
 								type="submit"
 								disabled={isSubmitting}
-								className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-60"
+								className="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600
+										   text-white py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-300
+										   disabled:opacity-60 disabled:cursor-not-allowed"
 							>
 								Login
 							</button>
@@ -97,16 +97,14 @@ const UserLogin = () => {
 					)}
 				</Formik>
 
-				<div className="text-sm flex  justify-center items-center">
-					Don`t have an account?
+				<div className="text-sm text-center mt-5 text-gray-700 dark:text-gray-300">
+					Don’t have an account?{" "}
 					<Link href={`/register`}>
-						<span className="hover:underline hover:text-blue-600">
-							{" "}
+						<span className="hover:underline hover:text-indigo-600 cursor-pointer">
 							Signup here
 						</span>
 					</Link>
 				</div>
-				{/* <div>{JSON.stringify(formData)}</div> */}
 			</div>
 		</div>
 	);
