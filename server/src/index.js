@@ -3,11 +3,13 @@ const dbConnect = require("./db/connection");
 const dotenv = require("dotenv");
 dotenv.config();
 const express = require("express");
-const cors = require("cors");
 const app = express();
-const userRoute = require("./routes/userRoute");
-// middleware
 
+const cors = require("cors");
+const userRoute = require("./routes/userRoute");
+const todoRoute = require("./routes/todoRoute");
+
+// middleware
 app.use(express.json());
 app.use(cors());
 
@@ -15,8 +17,10 @@ app.use(cors());
 dbConnect();
 
 // routing
+
 app.use(userRoute);
 
+app.use(todoRoute);
 // 404 HANDLER (Route Not Found)
 app.use((req, res, next) => {
 	const error = new Error(`Route not found - ${req.originalUrl}`);

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const taskSchema = new mongoose.Schema(
+const todoSchema = new mongoose.Schema(
 	{
 		title: {
 			type: String,
@@ -20,26 +20,25 @@ const taskSchema = new mongoose.Schema(
 			type: String,
 			enum: ["todo", "new", "doing", "done"],
 			default: "todo",
-			index: true, 
+			index: true,
 		},
 
 		order: {
 			type: Number,
 			required: true,
 			min: 0,
-			index: true, 
+			index: true,
 		},
 
 		userId: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "User",
 			required: true,
-			index: true, 
+			index: true,
 		},
 	},
 	{
 		timestamps: true,
-
 		indexes: [
 			{
 				fields: { userId: 1, status: 1, order: 1 },
@@ -49,4 +48,4 @@ const taskSchema = new mongoose.Schema(
 	}
 );
 
-module.exports = mongoose.model("Task", taskSchema);
+module.exports = mongoose.model("Todo", todoSchema);
