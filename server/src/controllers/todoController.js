@@ -40,4 +40,23 @@ const createTodo = async (req, res) => {
 	}
 };
 
-module.exports = { createTodo };
+const getTodos = async (req, res) => {
+	try {
+		const { userId } = req.params;
+
+		if (!mongoose.Types.ObjectId.isValid(userId)) {
+			return res.status(400).json({ message: "Invalid userId" });
+		}
+
+		const todos = await Todo.find({ userId }).sort({ status: 1, order: 1 });
+
+		res.status(200).json({
+			message: "Todos fetched successfully",
+			todos,
+		});
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
+module.exports = { createTodo, getTodos };
