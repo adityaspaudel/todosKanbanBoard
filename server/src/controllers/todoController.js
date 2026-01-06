@@ -59,4 +59,40 @@ const getTodos = async (req, res) => {
 	}
 };
 
-module.exports = { createTodo, getTodos };
+const updateTodo = async (req, res) => {
+	try {
+		const { todoId } = req.params;
+		const { title, description, status, order } = req.body;
+
+		if (!mongoose.Types.ObjectId.isValid(todoId)) {
+			return res.status(400).json({ message: "Invalid todoId" });
+		}
+
+		const updatedTodo = await Todo.findByIdAndUpdate(
+			todoId,
+			{
+				...(title !== undefined && { title }),
+				...(description !== undefined && { description }),
+				...(status !== undefined && { status }),
+				...(order !== undefined && { order }),
+			},
+			{ new: true }
+		);
+
+		if (!updatedTodo) {
+			return res.status(404).json({ message: "Todo not found" });
+		}
+
+		res.status(200).json({
+			message: "Todo updated successfully",
+			todo: updatedTodo,
+		});
+	} catch (error) {
+		if (error.code === 11000) {
+			return res.status(409).json({ message: "Order conflict, retry" });
+		}
+		res.status(500).json({ error: error.message });
+	}
+};
+
+module.exports = { createTodo, getTodos, updateTodo };
