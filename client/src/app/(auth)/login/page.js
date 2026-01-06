@@ -15,7 +15,7 @@ const UserLogin = () => {
 	const router = useRouter();
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-gray-100 p-4">
+		<div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-400 to-gray-500 p-4">
 			<div
 				className="w-full max-w-md bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 
 							transition-transform transform hover:scale-[1.02] duration-300"

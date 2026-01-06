@@ -21,7 +21,7 @@ const UserRegistration = () => {
 	}, []);
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-gray-100 p-4">
+		<div className="min-h-screen flex items-center justify-center bg-linear-to-br from-gray-400 to-gray-500 p-4">
 			<div
 				className={`w-full max-w-md bg-gray-900 text-white rounded-3xl shadow-2xl p-8
 					transform transition-all duration-500 ease-out

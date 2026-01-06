@@ -264,7 +264,8 @@ export default function KanbanPage() {
 	return (
 		<div className="flex flex-col content-center items-center min-h-screen bg-gray-100 dark:bg-gray-900 p-6 text-black dark:text-white">
 			{/* Header */}
-			<div className="flex justify-between w-full items-center mb-6">
+			<div className="flex justify-between w-full items-center mb-4">
+				<span></span>
 				<h1 className="text-2xl font-bold text-indigo-900 dark:text-indigo-300">
 					Kanban Todos
 				</h1>
@@ -277,6 +278,7 @@ export default function KanbanPage() {
 			</div>
 
 			{/* Todo Form */}
+
 			<div className="bg-white dark:bg-gray-800 p-4 rounded shadow mb-6 space-y-3">
 				<input
 					type="text"
@@ -293,23 +295,25 @@ export default function KanbanPage() {
 					placeholder="Description (optional)"
 					className="w-full p-2 border rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 				/>
-				<select
-					name="status"
-					value={formData.status}
-					onChange={handleChange}
-					className="p-2 border rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-				>
-					<option value="todo">Todo</option>
-					<option value="new">New</option>
-					<option value="doing">Doing</option>
-					<option value="done">Done</option>
-				</select>
-				<button
-					onClick={submitTodo}
-					className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded transition-colors duration-200"
-				>
-					{editingTodoId ? "Update Todo" : "Add Todo"}
-				</button>
+				<div className="flex gap-2">
+					<select
+						name="status"
+						value={formData.status}
+						onChange={handleChange}
+						className="p-2 border rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+					>
+						<option value="todo">Todo</option>
+						<option value="new">New</option>
+						<option value="doing">Doing</option>
+						<option value="done">Done</option>
+					</select>
+					<button
+						onClick={submitTodo}
+						className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded transition-colors duration-200"
+					>
+						{editingTodoId ? "Update Todo" : "Add Todo"}
+					</button>
+				</div>
 			</div>
 
 			{/* Kanban Columns */}
