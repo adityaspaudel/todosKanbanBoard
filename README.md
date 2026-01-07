@@ -114,6 +114,4 @@ Follow the steps below to run both **Frontend (Next.js/React)** and **Backend (N
 
 ## Live Demo
 
-<video src="https://www.youtube.com/watch?v=QlPhq97Ir1k" controls width="600">
-  Your browser does not support the video tag.
-</video>
+https://www.youtube.com/watch?v=QlPhq97Ir1k
