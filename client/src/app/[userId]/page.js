@@ -20,9 +20,7 @@ import { CSS } from "@dnd-kit/utilities";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// -------------------------
 // Sortable Todo Item
-// -------------------------
 function SortableItem({ todo, status, handleEdit, deleteTodo }) {
 	const { attributes, listeners, setNodeRef, transform, transition } =
 		useSortable({ id: String(todo._id) });
@@ -70,9 +68,7 @@ function SortableItem({ todo, status, handleEdit, deleteTodo }) {
 	);
 }
 
-// -------------------------
 // Kanban Column Droppable
-// -------------------------
 function KanbanColumn({ status, todos, handleEdit, deleteTodo }) {
 	const { setNodeRef } = useDroppable({ id: status });
 
@@ -86,15 +82,17 @@ function KanbanColumn({ status, todos, handleEdit, deleteTodo }) {
 			<h2 className="font-bold text-lg mb-2 text-indigo-900 dark:text-indigo-300 capitalize">
 				{status}
 			</h2>
-			{todos.map((todo) => (
-				<SortableItem
-					key={todo._id}
-					todo={todo}
-					status={status}
-					handleEdit={handleEdit}
-					deleteTodo={deleteTodo}
-				/>
-			))}
+			<div>
+				{todos.map((todo) => (
+					<SortableItem
+						key={todo._id}
+						todo={todo}
+						status={status}
+						handleEdit={handleEdit}
+						deleteTodo={deleteTodo}
+					/>
+				))}
+			</div>
 			{todos.length === 0 && (
 				<div className="text-gray-500 dark:text-gray-400 text-center mt-8 italic select-none">
 					Drop here
@@ -104,9 +102,7 @@ function KanbanColumn({ status, todos, handleEdit, deleteTodo }) {
 	);
 }
 
-// -------------------------
 // Main KanbanPage Component
-// -------------------------
 export default function KanbanPage() {
 	const { userId } = useParams();
 	const router = useRouter();
@@ -197,7 +193,7 @@ export default function KanbanPage() {
 	// Organize Todos by Status
 	const todoColumns = {
 		todo: todos.filter((t) => t.status === "todo"),
-		new: todos.filter((t) => t.status === "new"),
+		next: todos.filter((t) => t.status === "next"),
 		doing: todos.filter((t) => t.status === "doing"),
 		done: todos.filter((t) => t.status === "done"),
 	};
@@ -221,7 +217,7 @@ export default function KanbanPage() {
 				.filter((t) => t.status === overStatus);
 			newIndex = targetColumn.findIndex((t) => t._id === overTodo._id);
 			if (newIndex === -1) newIndex = targetColumn.length;
-		} else if (["todo", "new", "doing", "done"].includes(over.id)) {
+		} else if (["todo", "next", "doing", "done"].includes(over.id)) {
 			overStatus = over.id;
 			newIndex = 0;
 		}
@@ -231,7 +227,7 @@ export default function KanbanPage() {
 		targetColumn.splice(newIndex, 0, { ...dragged, status: overStatus });
 
 		const updatedTodos = [];
-		for (const status of ["todo", "new", "doing", "done"]) {
+		for (const status of ["todo", "next", "doing", "done"]) {
 			const column =
 				status === overStatus
 					? targetColumn
@@ -277,8 +273,39 @@ export default function KanbanPage() {
 				</button>
 			</div>
 
-			{/* Todo Form */}
+			{/* Kanban Columns */}
+			{loading ? (
+				<p className="text-center">Loading...</p>
+			) : (
+				<DndContext
+					sensors={sensors}
+					collisionDetection={closestCenter}
+					onDragEnd={handleDragEnd}
+					onDragStart={(e) => setActiveId(e.active.id)}
+				>
+					<div className="flex gap-4 overflow-x-auto pb-4">
+						{["todo", "next", "doing", "done"].map((status) => (
+							<KanbanColumn
+								key={status}
+								status={status}
+								todos={todoColumns[status]}
+								handleEdit={handleEdit}
+								deleteTodo={deleteTodo}
+							/>
+						))}
+					</div>
 
+					<DragOverlay>
+						{activeId ? (
+							<div className="bg-white dark:bg-gray-800 p-3 rounded shadow-lg text-indigo-900 dark:text-indigo-300">
+								{todos.find((t) => String(t._id) === String(activeId))?.title}
+							</div>
+						) : null}
+					</DragOverlay>
+				</DndContext>
+			)}
+
+			{/* Todo Form */}
 			<div className="bg-white dark:bg-gray-800 p-4 rounded shadow mb-6 space-y-3">
 				<input
 					type="text"
@@ -303,7 +330,7 @@ export default function KanbanPage() {
 						className="p-2 border rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
 					>
 						<option value="todo">Todo</option>
-						<option value="new">New</option>
+						<option value="next">Next</option>
 						<option value="doing">Doing</option>
 						<option value="done">Done</option>
 					</select>
@@ -315,38 +342,6 @@ export default function KanbanPage() {
 					</button>
 				</div>
 			</div>
-
-			{/* Kanban Columns */}
-			{loading ? (
-				<p className="text-center">Loading...</p>
-			) : (
-				<DndContext
-					sensors={sensors}
-					collisionDetection={closestCenter}
-					onDragEnd={handleDragEnd}
-					onDragStart={(e) => setActiveId(e.active.id)}
-				>
-					<div className="flex gap-4 overflow-x-auto pb-4">
-						{["todo", "new", "doing", "done"].map((status) => (
-							<KanbanColumn
-								key={status}
-								status={status}
-								todos={todoColumns[status]}
-								handleEdit={handleEdit}
-								deleteTodo={deleteTodo}
-							/>
-						))}
-					</div>
-
-					<DragOverlay>
-						{activeId ? (
-							<div className="bg-white dark:bg-gray-800 p-3 rounded shadow-lg text-indigo-900 dark:text-indigo-300">
-								{todos.find((t) => String(t._id) === String(activeId))?.title}
-							</div>
-						) : null}
-					</DragOverlay>
-				</DndContext>
-			)}
 		</div>
 	);
 }
