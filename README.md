@@ -54,6 +54,7 @@ A simple and intuitive **Kanban-style Todo Board** that helps you organize tasks
 - **Backend :** Node.js, Express,
 - **Database :** MongoDB
 - **Authentication :** Bcrypt, Json Web Token
+
 ---
 
 ---
@@ -111,12 +112,8 @@ Follow the steps below to run both **Frontend (Next.js/React)** and **Backend (N
 
 6. Backend server will run on [http://localhost:8000](http://localhost:8000) by default.
 
-
 ## Live Demo
 
-<video src="./client/public/screenRecord/todosKanban.mp4" controls width="600">
+<video src="https://www.youtube.com/watch?v=QlPhq97Ir1k" controls width="600">
   Your browser does not support the video tag.
 </video>
-
-
-![Watch the video](https://www.youtube.com/watch?v=QlPhq97Ir1k)
