@@ -110,3 +110,8 @@ Follow the steps below to run both **Frontend (Next.js/React)** and **Backend (N
 5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the frontend.
 
 6. Backend server will run on [http://localhost:8000](http://localhost:8000) by default.
+
+
+## Live Demo
+
+[![Watch the video](/client/public/screenRecord/todosKanban.mp4)]
