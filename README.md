@@ -114,8 +114,6 @@ Follow the steps below to run both **Frontend (Next.js/React)** and **Backend (N
 
 ## Live Demo
 
-<video width="320" height="240" controls>
-  <source src="/client/public/screenRecord/todosKanban.mp4" type="video/mp4">
-  <!-- <source src="video.webm" type="video/webm"> -->
+<video src="./client/public/screenRecord/todosKanban.mp4" controls width="600">
   Your browser does not support the video tag.
 </video>
