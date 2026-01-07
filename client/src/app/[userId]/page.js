@@ -20,8 +20,10 @@ import { CSS } from "@dnd-kit/utilities";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// Sortable Todo Item
-function SortableItem({ todo, status, handleEdit, deleteTodo }) {
+/* =======================
+   Sortable Todo Item
+======================= */
+function SortableItem({ todo, handleEdit, deleteTodo }) {
 	const { attributes, listeners, setNodeRef, transform, transition } =
 		useSortable({ id: String(todo._id) });
 
@@ -36,30 +38,23 @@ function SortableItem({ todo, status, handleEdit, deleteTodo }) {
 			style={style}
 			{...attributes}
 			{...listeners}
-			data-status={status}
-			data-id={String(todo._id)}
-			className="bg-white dark:bg-gray-800 p-3 rounded shadow mb-3 flex flex-col gap-2 cursor-pointer 
-					   hover:scale-[1.02] transition-transform duration-200 ease-out"
+			className="bg-white dark:bg-gray-800 p-3 rounded shadow mb-3 flex flex-col gap-2 cursor-grab active:cursor-grabbing"
 		>
-			<p className="font-semibold text-gray-900 dark:text-gray-100">
-				{todo.title}
-			</p>
-			<p className="text-sm text-gray-500 dark:text-gray-400">
-				{todo.description}
-			</p>
-			<p className="text-sm text-gray-700 dark:text-gray-300">
-				Status: {todo.status}
-			</p>
+			<p className="font-semibold">{todo.title}</p>
+			{todo.description && (
+				<p className="text-sm text-gray-500">{todo.description}</p>
+			)}
+
 			<div className="flex gap-2 mt-2">
 				<button
 					onClick={() => handleEdit(todo)}
-					className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded transition-colors duration-200"
+					className="bg-indigo-600 text-white px-3 py-1 rounded"
 				>
 					Edit
 				</button>
 				<button
 					onClick={() => deleteTodo(todo._id)}
-					className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition-colors duration-200"
+					className="bg-red-500 text-white px-3 py-1 rounded"
 				>
 					Delete
 				</button>
@@ -68,69 +63,72 @@ function SortableItem({ todo, status, handleEdit, deleteTodo }) {
 	);
 }
 
-// Kanban Column Droppable
+/* =======================
+   Kanban Column
+======================= */
 function KanbanColumn({ status, todos, handleEdit, deleteTodo }) {
 	const { setNodeRef } = useDroppable({ id: status });
 
 	return (
 		<div
 			ref={setNodeRef}
-			data-status={status}
-			className="bg-gray-300 dark:bg-gray-700 p-3 rounded min-h-[300px] w-64 shrink-0
-					   flex flex-col transition-all duration-300 hover:shadow-lg"
+			className="bg-gray-200 dark:bg-gray-700 p-3 rounded min-h-[320px] w-64"
 		>
-			<h2 className="font-bold text-lg mb-2 text-indigo-900 dark:text-indigo-300 capitalize">
-				{status}
-			</h2>
-			<div>
+			<h2 className="font-bold mb-3 capitalize">{status}</h2>
+
+			<SortableContext
+				items={todos.map((t) => String(t._id))}
+				strategy={verticalListSortingStrategy}
+			>
 				{todos.map((todo) => (
 					<SortableItem
 						key={todo._id}
 						todo={todo}
-						status={status}
 						handleEdit={handleEdit}
 						deleteTodo={deleteTodo}
 					/>
 				))}
-			</div>
+			</SortableContext>
+
 			{todos.length === 0 && (
-				<div className="text-gray-500 dark:text-gray-400 text-center mt-8 italic select-none">
-					Drop here
-				</div>
+				<p className="text-center text-gray-500 italic mt-6">Drop here</p>
 			)}
 		</div>
 	);
 }
 
-// Main KanbanPage Component
+/* =======================
+   Main Page
+======================= */
 export default function KanbanPage() {
 	const { userId } = useParams();
 	const router = useRouter();
 
 	const [todos, setTodos] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [activeId, setActiveId] = useState(null);
+
 	const [formData, setFormData] = useState({
 		title: "",
 		description: "",
 		status: "todo",
 	});
-	const [loading, setLoading] = useState(true);
-	const [editingTodoId, setEditingTodoId] = useState(null);
-	const [activeId, setActiveId] = useState(null);
+	const [editingId, setEditingId] = useState(null);
 
-	// DnD Sensors
 	const sensors = useSensors(
-		useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+		useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
 	);
 
-	// Fetch Todos
+	/* =======================
+	   Fetch Todos
+	======================= */
 	const fetchTodos = async () => {
 		if (!userId) return;
 		setLoading(true);
 		try {
 			const res = await fetch(`${API_URL}/todo/${userId}/getTodos`);
 			const data = await res.json();
-			const sorted = (data.todos || []).sort((a, b) => a.order - b.order);
-			setTodos(sorted);
+			setTodos((data.todos || []).sort((a, b) => a.order - b.order));
 		} catch (err) {
 			console.error(err);
 		} finally {
@@ -142,63 +140,9 @@ export default function KanbanPage() {
 		fetchTodos();
 	}, [userId]);
 
-	// Form Handlers
-	const handleChange = (e) => {
-		const { name, value } = e.target;
-		setFormData((prev) => ({ ...prev, [name]: value }));
-	};
-
-	const submitTodo = async () => {
-		if (!formData.title.trim()) return;
-		try {
-			if (editingTodoId) {
-				await fetch(`${API_URL}/todo/${editingTodoId}/updateTodo`, {
-					method: "PUT",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(formData),
-				});
-			} else {
-				await fetch(`${API_URL}/todo/${userId}/createTodo`, {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(formData),
-				});
-			}
-			setFormData({ title: "", description: "", status: "todo" });
-			setEditingTodoId(null);
-			fetchTodos();
-		} catch (err) {
-			console.error(err);
-		}
-	};
-
-	const deleteTodo = async (todoId) => {
-		try {
-			await fetch(`${API_URL}/todo/${todoId}/deleteTodo`, { method: "DELETE" });
-			fetchTodos();
-		} catch (err) {
-			console.error(err);
-		}
-	};
-
-	const handleEdit = (todo) => {
-		setFormData({
-			title: todo.title,
-			description: todo.description || "",
-			status: todo.status,
-		});
-		setEditingTodoId(todo._id);
-	};
-
-	// Organize Todos by Status
-	const todoColumns = {
-		todo: todos.filter((t) => t.status === "todo"),
-		next: todos.filter((t) => t.status === "next"),
-		doing: todos.filter((t) => t.status === "doing"),
-		done: todos.filter((t) => t.status === "done"),
-	};
-
-	// Handle Drag End
+	/* =======================
+	   Drag End (FIXED)
+	======================= */
 	const handleDragEnd = async ({ active, over }) => {
 		setActiveId(null);
 		if (!active || !over) return;
@@ -206,89 +150,127 @@ export default function KanbanPage() {
 		const dragged = todos.find((t) => String(t._id) === String(active.id));
 		if (!dragged) return;
 
-		let overStatus = dragged.status;
+		let newStatus = dragged.status;
 		let newIndex = 0;
 
 		const overTodo = todos.find((t) => String(t._id) === String(over.id));
+
 		if (overTodo) {
-			overStatus = overTodo.status;
-			const targetColumn = todos
-				.filter((t) => t._id !== dragged._id)
-				.filter((t) => t.status === overStatus);
-			newIndex = targetColumn.findIndex((t) => t._id === overTodo._id);
-			if (newIndex === -1) newIndex = targetColumn.length;
-		} else if (["todo", "next", "doing", "done"].includes(over.id)) {
-			overStatus = over.id;
-			newIndex = 0;
+			newStatus = overTodo.status;
+			const column = todos.filter(
+				(t) => t.status === newStatus && t._id !== dragged._id
+			);
+			newIndex = column.findIndex((t) => t._id === overTodo._id);
+		} else {
+			newStatus = over.id;
 		}
 
-		const newTodos = todos.filter((t) => t._id !== dragged._id);
-		const targetColumn = newTodos.filter((t) => t.status === overStatus);
-		targetColumn.splice(newIndex, 0, { ...dragged, status: overStatus });
+		const remaining = todos.filter((t) => t._id !== dragged._id);
+		const targetColumn = remaining.filter((t) => t.status === newStatus);
 
-		const updatedTodos = [];
-		for (const status of ["todo", "next", "doing", "done"]) {
-			const column =
-				status === overStatus
+		targetColumn.splice(newIndex, 0, { ...dragged, status: newStatus });
+
+		const updated = [];
+		["todo", "next", "doing", "done"].forEach((status) => {
+			const col =
+				status === newStatus
 					? targetColumn
-					: newTodos.filter((t) => t.status === status);
-			column.forEach((t, idx) => updatedTodos.push({ ...t, order: idx }));
-		}
+					: remaining.filter((t) => t.status === status);
+			col.forEach((t, i) => updated.push({ ...t, order: i }));
+		});
 
-		setTodos(updatedTodos);
+		// ✅ Optimistic UI (NO JUMP)
+		setTodos(updated);
 
+		// Persist only
 		try {
-			const movedTodo = updatedTodos.find((t) => t._id === dragged._id);
+			const moved = updated.find((t) => t._id === dragged._id);
 			await fetch(`${API_URL}/todo/${dragged._id}/moveTodo`, {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					status: movedTodo.status,
-					order: movedTodo.order,
+					status: moved.status,
+					order: moved.order,
 				}),
 			});
-			fetchTodos();
 		} catch (err) {
-			console.error("Error moving todo:", err);
-			fetchTodos();
+			console.error(err);
+			fetchTodos(); // fallback
 		}
 	};
 
-	// -------------------------
-	// Render
-	// -------------------------
+	/* =======================
+	   CRUD
+	======================= */
+	const submitTodo = async () => {
+		if (!formData.title.trim()) return;
+
+		const url = editingId
+			? `${API_URL}/todo/${editingId}/updateTodo`
+			: `${API_URL}/todo/${userId}/createTodo`;
+
+		const method = editingId ? "PUT" : "POST";
+
+		await fetch(url, {
+			method,
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(formData),
+		});
+
+		setFormData({ title: "", description: "", status: "todo" });
+		setEditingId(null);
+		fetchTodos();
+	};
+
+	const deleteTodo = async (id) => {
+		await fetch(`${API_URL}/todo/${id}/deleteTodo`, { method: "DELETE" });
+		fetchTodos();
+	};
+
+	const handleEdit = (todo) => {
+		setEditingId(todo._id);
+		setFormData(todo);
+	};
+
+	const columns = {
+		todo: todos.filter((t) => t.status === "todo"),
+		next: todos.filter((t) => t.status === "next"),
+		doing: todos.filter((t) => t.status === "doing"),
+		done: todos.filter((t) => t.status === "done"),
+	};
+
+	/* =======================
+	   Render
+	======================= */
 	return (
-		<div className="flex flex-col content-center items-center min-h-screen bg-gray-100 dark:bg-gray-900 p-6 text-black dark:text-white">
-			{/* Header */}
-			<div className="flex justify-between w-full items-center mb-4">
+		<div className="flex flex-col content-center items-center min-h-screen p-6 bg-gray-100 dark:bg-gray-900">
+			<div className="flex gap-2 justify-between items-center mb-6 w-full ">
 				<span></span>
-				<h1 className="text-2xl font-bold text-indigo-900 dark:text-indigo-300">
-					Kanban Todos
-				</h1>
+				<h1 className="text-2xl font-bold">Kanban Todos</h1>
 				<button
 					onClick={() => router.push("/")}
-					className="text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded transition-colors duration-200"
+					className="bg-red-500 text-white px-4 py-2 rounded"
 				>
 					Logout
 				</button>
 			</div>
 
-			{/* Kanban Columns */}
 			{loading ? (
-				<p className="text-center">Loading...</p>
+				<p>Loading...</p>
 			) : (
 				<DndContext
 					sensors={sensors}
 					collisionDetection={closestCenter}
-					onDragEnd={handleDragEnd}
 					onDragStart={(e) => setActiveId(e.active.id)}
+					onDragEnd={handleDragEnd}
+					autoScroll={false} // ✅ FIX
 				>
 					<div className="flex gap-4 overflow-x-auto pb-4">
-						{["todo", "next", "doing", "done"].map((status) => (
+						{Object.keys(columns).map((status) => (
 							<KanbanColumn
 								key={status}
 								status={status}
-								todos={todoColumns[status]}
+								todos={columns[status]}
 								handleEdit={handleEdit}
 								deleteTodo={deleteTodo}
 							/>
@@ -296,51 +278,66 @@ export default function KanbanPage() {
 					</div>
 
 					<DragOverlay>
-						{activeId ? (
-							<div className="bg-white dark:bg-gray-800 p-3 rounded shadow-lg text-indigo-900 dark:text-indigo-300">
-								{todos.find((t) => String(t._id) === String(activeId))?.title}
+						{activeId && (
+							<div className="bg-gray-600 p-3 rounded shadow">
+								{todos.find((t) => String(t._id) === String(activeId)) && (
+									<div className="bg-gray-600 p-3 rounded shadow space-y-1">
+										{(() => {
+											const t = todos.find(
+												(todo) => String(todo._id) === String(activeId)
+											);
+											return (
+												<>
+													<div>{t.title}</div>
+													<div>{t.description}</div>
+													{/* <div>{t.status}</div> */}
+													{/* <div>{t.order}</div> */}
+												</>
+											);
+										})()}
+									</div>
+								)}
 							</div>
-						) : null}
+						)}
 					</DragOverlay>
 				</DndContext>
 			)}
 
-			{/* Todo Form */}
-			<div className="bg-white dark:bg-gray-800 p-4 rounded shadow mb-6 space-y-3">
+			{/* Form */}
+			<div className="bg-white dark:bg-gray-800 p-4 rounded shadow mt-6 space-y-3 max-w-2xl">
 				<input
-					type="text"
 					name="title"
+					placeholder="Title"
 					value={formData.title}
-					onChange={handleChange}
-					placeholder="Todo title *"
-					className="w-full p-2 border rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+					onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+					className="w-full p-2 border rounded"
 				/>
 				<textarea
 					name="description"
+					placeholder="Description"
 					value={formData.description}
-					onChange={handleChange}
-					placeholder="Description (optional)"
-					className="w-full p-2 border rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+					onChange={(e) =>
+						setFormData({ ...formData, description: e.target.value })
+					}
+					className="w-full p-2 border rounded"
 				/>
-				<div className="flex gap-2">
-					<select
-						name="status"
-						value={formData.status}
-						onChange={handleChange}
-						className="p-2 border rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-					>
-						<option value="todo">Todo</option>
-						<option value="next">Next</option>
-						<option value="doing">Doing</option>
-						<option value="done">Done</option>
-					</select>
-					<button
-						onClick={submitTodo}
-						className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded transition-colors duration-200"
-					>
-						{editingTodoId ? "Update Todo" : "Add Todo"}
-					</button>
-				</div>
+				<select
+					value={formData.status}
+					onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+					className="p-2 border rounded bg-gray-600"
+				>
+					<option value="todo">Todo</option>
+					<option value="next">Next</option>
+					<option value="doing">Doing</option>
+					<option value="done">Done</option>
+				</select>
+
+				<button
+					onClick={submitTodo}
+					className=" flex gap-2 bg-indigo-600 content-center items-center  text-white px-4 py-2 rounded"
+				>
+					{editingId ? "Update" : "Add"} Todo
+				</button>
 			</div>
 		</div>
 	);
