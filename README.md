@@ -119,4 +119,4 @@ Follow the steps below to run both **Frontend (Next.js/React)** and **Backend (N
 </video>
 
 
-![Watch the video](./client/public/screenRecord/todosKanban.mp4)ig
+![Watch the video](./client/public/screenRecord/todosKanban.mp4)
