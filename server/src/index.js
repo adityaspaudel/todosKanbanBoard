@@ -17,10 +17,9 @@ app.use(cors());
 dbConnect();
 
 // routing
-
 app.use(userRoute);
-
 app.use(todoRoute);
+
 app.get("/", (req, res) => {
 	res.send("API is running 🚀");
 });
