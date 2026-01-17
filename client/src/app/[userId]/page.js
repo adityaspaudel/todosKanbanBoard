@@ -72,7 +72,7 @@ function KanbanColumn({ status, todos, handleEdit, deleteTodo }) {
 	return (
 		<div
 			ref={setNodeRef}
-			className="bg-gray-200 dark:bg-gray-700 p-3 rounded min-h-[320px] w-64"
+			className="bg-gray-200 dark:bg-gray-700 p-3 rounded min-h-80 w-64"
 		>
 			<h2 className="font-bold mb-3 capitalize">{status}</h2>
 
