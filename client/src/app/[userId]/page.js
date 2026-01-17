@@ -18,7 +18,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 /* =======================
    Sortable Todo Item
@@ -126,7 +126,7 @@ export default function KanbanPage() {
 		if (!userId) return;
 		setLoading(true);
 		try {
-			const res = await fetch(`${API_URL}/todo/${userId}/getTodos`);
+			const res = await fetch(`${NEXT_PUBLIC_API_URL}/todo/${userId}/getTodos`);
 			const data = await res.json();
 			setTodos((data.todos || []).sort((a, b) => a.order - b.order));
 		} catch (err) {
@@ -185,7 +185,7 @@ export default function KanbanPage() {
 		// Persist only
 		try {
 			const moved = updated.find((t) => t._id === dragged._id);
-			await fetch(`${API_URL}/todo/${dragged._id}/moveTodo`, {
+			await fetch(`${NEXT_PUBLIC_API_URL}/todo/${dragged._id}/moveTodo`, {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
@@ -206,8 +206,8 @@ export default function KanbanPage() {
 		if (!formData.title.trim()) return;
 
 		const url = editingId
-			? `${API_URL}/todo/${editingId}/updateTodo`
-			: `${API_URL}/todo/${userId}/createTodo`;
+			? `${NEXT_PUBLIC_API_URL}/todo/${editingId}/updateTodo`
+			: `${NEXT_PUBLIC_API_URL}/todo/${userId}/createTodo`;
 
 		const method = editingId ? "PUT" : "POST";
 
@@ -223,7 +223,7 @@ export default function KanbanPage() {
 	};
 
 	const deleteTodo = async (id) => {
-		await fetch(`${API_URL}/todo/${id}/deleteTodo`, { method: "DELETE" });
+		await fetch(`${NEXT_PUBLIC_API_URL}/todo/${id}/deleteTodo`, { method: "DELETE" });
 		fetchTodos();
 	};
 
