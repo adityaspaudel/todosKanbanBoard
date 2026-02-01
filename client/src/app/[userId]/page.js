@@ -17,6 +17,7 @@ import {
 	useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useCallback } from "react";
 
 const NEXT_PUBLIC_API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -116,13 +117,13 @@ export default function KanbanPage() {
 	const [editingId, setEditingId] = useState(null);
 
 	const sensors = useSensors(
-		useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
+		useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
 	);
 
 	/* =======================
 	   Fetch Todos
 	======================= */
-	const fetchTodos = async () => {
+	const fetchTodos = useCallback(async () => {
 		if (!userId) return;
 		setLoading(true);
 		try {
@@ -134,11 +135,11 @@ export default function KanbanPage() {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [userId]);
 
 	useEffect(() => {
 		fetchTodos();
-	}, [userId]);
+	}, [userId, fetchTodos]);
 
 	/* =======================
 	   Drag End (FIXED)
@@ -158,7 +159,7 @@ export default function KanbanPage() {
 		if (overTodo) {
 			newStatus = overTodo.status;
 			const column = todos.filter(
-				(t) => t.status === newStatus && t._id !== dragged._id
+				(t) => t.status === newStatus && t._id !== dragged._id,
 			);
 			newIndex = column.findIndex((t) => t._id === overTodo._id);
 		} else {
@@ -223,7 +224,9 @@ export default function KanbanPage() {
 	};
 
 	const deleteTodo = async (id) => {
-		await fetch(`${NEXT_PUBLIC_API_URL}/todo/${id}/deleteTodo`, { method: "DELETE" });
+		await fetch(`${NEXT_PUBLIC_API_URL}/todo/${id}/deleteTodo`, {
+			method: "DELETE",
+		});
 		fetchTodos();
 	};
 
@@ -284,7 +287,7 @@ export default function KanbanPage() {
 									<div className="bg-gray-600 p-3 rounded shadow space-y-1">
 										{(() => {
 											const t = todos.find(
-												(todo) => String(todo._id) === String(activeId)
+												(todo) => String(todo._id) === String(activeId),
 											);
 											return (
 												<>
