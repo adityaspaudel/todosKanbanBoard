@@ -12,23 +12,23 @@ A simple and intuitive **Kanban-style Todo Board** that helps you organize tasks
 
 ## ✨ Features (Progress Tracker)
 
-- [ ] Create tasks
-- [ ] Display tasks in Kanban board layout
-- [ ] Four Kanban columns
-  - [ ] **Todo Tasks** – Tasks to be started
-  - [ ] **Next Tasks** – Tasks queued up next
-  - [ ] **Doing** – Tasks currently in progress
-  - [ ] **Done** – Completed tasks
-- [ ] Move tasks between columns
-- [ ] Clean and minimal UI
+- [x] Create tasks
+- [x] Display tasks in Kanban board layout
+- [x] Four Kanban columns
+  - [x] **Todo Tasks** – Tasks to be started
+  - [x] **Next Tasks** – Tasks queued up next
+  - [x] **Doing** – Tasks currently in progress
+  - [x] **Done** – Completed tasks
+- [x] Move tasks between columns
+- [x] Clean and minimal UI
 <!-- - [ ] Responsive layout -->
 
 ### 🚧 In Progress / Planned
-- [ ] Drag & drop task movement
-- [ ] Edit task title and description
-- [ ] Delete tasks
-- [ ] Persist data (LocalStorage / Database)
-<!-- - [ ] User authentication -->
+- [x] Drag & drop task movement
+- [x] Edit task title and description
+- [x] Delete tasks
+- [x] Persist data (LocalStorage / Database)
+- [x] User authentication
 <!-- - [ ] Task priority (Low / Medium / High) -->
 <!-- - [ ] Due dates for tasks -->
 
@@ -66,7 +66,7 @@ Follow the steps below to run both **Frontend (Next.js/React)** and **Backend (N
 ### 📦 Prerequisites
 
 - Node.js (v18+ recommended)
-- npm or yarn
+- npm or pnpm
 - MongoDB (local or MongoDB Atlas)
 
 ---
@@ -84,10 +84,10 @@ Follow the steps below to run both **Frontend (Next.js/React)** and **Backend (N
 
    ```
    cd client
-   npm install
+   pnpm install
 
-   cd ../server
-   npm install
+   cd server
+   pnpm install
    ```
 
 3. Set up environment variables
@@ -97,14 +97,14 @@ Follow the steps below to run both **Frontend (Next.js/React)** and **Backend (N
 
    ```
    cd client
-   npm run dev
+   pnpm dev
    ```
 
    For the backend server:
 
    ```
-   cd ../server
-   npm run dev
+   cd server
+   pnpm dev
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the frontend.
