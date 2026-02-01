@@ -28,7 +28,7 @@ A simple and intuitive **Kanban-style Todo Board** that helps you organize tasks
 - [x] Edit task title and description
 - [x] Delete tasks
 - [x] User authentication
-- x] Persist data (LocalStorage / Database)
+- [x] Persist data (LocalStorage / Database)
   <!-- - [ ] Task priority (Low / Medium / High) -->
   <!-- - [ ] Due dates for tasks -->
 
