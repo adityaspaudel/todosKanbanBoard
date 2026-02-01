@@ -68,7 +68,7 @@ Follow the steps below to run both **Frontend (Next.js/React)** and **Backend (N
 ### 📦 Prerequisites
 
 - Node.js (v18+ recommended)
-- npm or yarn
+- npm or pnpm
 - MongoDB (local or MongoDB Atlas)
 
 ---
@@ -85,10 +85,10 @@ Follow the steps below to run both **Frontend (Next.js/React)** and **Backend (N
 
    ```
    cd client
-   npm install
+   pnpm install
 
-   cd ../server
-   npm install
+   cd server
+   pnpm install
    ```
 
 3. Set up environment variables
@@ -98,14 +98,14 @@ Follow the steps below to run both **Frontend (Next.js/React)** and **Backend (N
 
    ```
    cd client
-   npm run dev
+   pnpm dev
    ```
 
    For the backend server:
 
    ```
-   cd ../server
-   npm run dev
+   cd server
+   pnpm dev
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the frontend.
